@@ -1,0 +1,22 @@
+#-------------------------------------------------------
+#   feat: Introducing new features.
+#   fix: Fixing a bug.
+#   docs: Only changes in documentation.
+#   style: Changes that do not affect the functionality of the code (e.g., code formatting, modifying whitespace, fixing syntax errors, etc.).
+#   refactor: Code changes that neither fix a bug nor add a new feature (e.g., refactoring).
+#   test: Adding or modifying tests.
+#   chore: Changes to the build process or auxiliary tools.
+#-------------------------------------------------------
+type: subject
+
+
+#-------------------------------------------------------
+#    Write the depiction in body
+#-------------------------------------------------------
+body
+
+
+#-------------------------------------------------------
+#    If it is solve issue, write Resolves: #123 
+#-------------------------------------------------------
+footer
