@@ -2,9 +2,10 @@
 # ignore file
 #--------------
 *.root
-
+*.o
 #-------------
 # ignore picture
 #--------------
 *.png
 *.svg
+*.pdf
