@@ -12,18 +12,24 @@
 #include <math.h>
 #include <string>
 using namespace std;
+
+//-------------------------------
+// Useful function
+//-------------------------------
 void efferr(float nsig, float ntotal, float factor = 1)
 {
     float eff = nsig / ntotal;
     float err = sqrt((1 - eff) * eff / ntotal);
     cout << "efficiency = " << eff * factor << " +- " << err * factor << endl;
 }
+
 bool pt_greater(const TLorentzVector a, const TLorentzVector b)
 {
     double A = a.Pt();
     double B = b.Pt();
     return (A > B);
 }
+
 double median_value(vector<double> tmpvector)
 {
     float med_value = 0.0;
@@ -39,6 +45,7 @@ double median_value(vector<double> tmpvector)
     }
     return (med_value);
 }
+
 double mean_value(const vector<double> &ttmpvector)
 {
     float sum_value = 0.0;
@@ -48,6 +55,7 @@ double mean_value(const vector<double> &ttmpvector)
     }
     return (sum_value / ttmpvector.size());
 }
+
 float cal_dphi(float phi1, float phi2)
 {
     float dphi = phi1 - phi2;
@@ -57,10 +65,27 @@ float cal_dphi(float phi1, float phi2)
         dphi += 2 * TMath::Pi();
     return TMath::Abs(dphi);
 }
-// void xAna_ztoee(string inputtxtFilename = "root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_Imp_DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8-ext2/210929_173914/0004/NCUGlobalTuples_4485.root", string outputfile = "/eos/user/k/kuanyu/data/DY_inclusive/DY_inclusive_9423.root")
-// void xAna_ztoee()
+
+int countLinesInFile(string filename)
+{
+    ifstream file(filename);
+    string line;
+    int lines = 0;
+    while (getline(file, line))
+        ++lines;
+    return lines;
+}
+
+void printProgressBar(int percent)
+{
+    cout << "\r" << setw(3) << percent << "% ";
+    int numBars = percent / 2;
+    for (int i = 0; i < numBars; ++i)
+        cout << "|";
+    cout << flush;
+}
 /// afs/cern.ch/user/k/kuanyu/test/tmp150.txt
-void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.txt", string outputfile = "./output/ee_Mx2_1_old_remove_0alpha.root")
+void xAna_ztoee_2016(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp150.txt", string outputfile = "./output/ee_Mx2_150_old_remove_0alpha.root")
 {
     // string inputFile(inputtxtFilename.data());
     cout << "inputtxtFilename = " << inputtxtFilename << endl;
@@ -70,16 +95,8 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
     fstream fin(inputtxtFilename, ios::in);
     if (!fin)
     {
-        // cout << "bug" << endl;
+        std::cout << "Failed to open file.\n";
     }
-    string tmps;
-    int line = 0;
-    while (getline(fin, tmps))
-    {
-        line++;
-    }
-    fin.close();
-    cout << "line" << line << endl;
 
     //------------------
     // Create histrogram
@@ -244,6 +261,9 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
     vector<double> v_TrkChi3D_Paper;
     vector<double> v_TrkChi3D;
     vector<double> v_TrkChi2D;
+    vector<double> v_TrkXYresolu;
+
+    vector<double> v_chi2_P;
 
     vector<float> v_bTrkIP2D;
     vector<float> v_bTrkChi3D;
@@ -256,6 +276,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
     T_tree->Branch("I_event", &I_event);
     T_tree->Branch("I_weight", &I_weight);
     T_tree->Branch("I_eventID", &I_eventID);
+    T_tree->Branch("v_chi2_P", &v_chi2_P);
     T_tree->Branch("I_tot_gencoevt", &I_tot_gencoevt);
     T_tree->Branch("I_tot_Recoevt", &I_tot_Recoevt);
     T_tree->Branch("I_Sumeventweight", &I_Sumeventweight);
@@ -287,6 +308,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
     T_tree->Branch("v_Trk_dxyerror", &v_Trk_dxyerror);
     T_tree->Branch("v_TrkIP3D", &v_TrkIP3D);
     T_tree->Branch("v_TrkChi2D", &v_TrkChi2D);
+    T_tree->Branch("v_TrkXYresolu", &v_TrkXYresolu);
     T_tree->Branch("v_TrkChi3D", &v_TrkChi3D);
     T_tree->Branch("v_TrkChi3D_Paper", &v_TrkChi3D_Paper);
     T_tree->Branch("v_nTrk_cut3Dsig", &v_nTrk_cut3Dsig);
@@ -311,28 +333,16 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
     T_tree->Branch("v_lTrkIP2D", &v_lTrkIP2D);
     T_tree->Branch("v_lTrkChi3D", &v_lTrkChi3D);
 
-    int filenumber = 0;
-    int max_filenumber = line;
+    int totalLines = countLinesInFile(inputtxtFilename);
+    int linesProcessed = 0;
+
     while (getline(flist, inputFile))
     {
 
-        // if (filenumber < max_filenumber - 1)
-        //{
-        //     cout << "file number = " << filenumber << endl;
-        //     cout << "process = "
-        //          << "[" << filenumber * 100.0 / (max_filenumber - 1) << "%"
-        //          << "]"
-        //          << "\n"
-        //          << endl;
-        // }
-        // else
-        //{
-        //     cout << "file number = " << filenumber << endl;
-        //     cout << "finish = "
-        //          << "[" << filenumber * 100.0 / (max_filenumber - 1) << "%"
-        //          << "]" << endl;
-        // }
-        filenumber++;
+        ++linesProcessed;
+        int percent = (100 * linesProcessed) / totalLines;
+        printProgressBar(percent);
+
         bool BKG2016MC = true;
         //  Identify input file type
         if (((inputFile).find("DYJetsToLL") != std::string::npos) ||
@@ -349,16 +359,9 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
         {
             BKG2016MC = true;
         }
-
-        // cout << "BKG2016MC before = " << BKG2016MC << endl;
         TreeReader data(inputFile.data());
         for (Long64_t jEntry = 0; jEntry < data.GetEntriesFast(); jEntry++)
-        // for (Long64_t jEntry = 0; jEntry < 5; jEntry++)
         {
-            // if (jEntry % 2000 == 0)
-            //{
-            //     fprintf(stderr, "Processing event %lli of %lli\n", jEntry + 1, data.GetEntriesFast());
-            // }
             //-------------------
             //  void some variable
             //-------------------
@@ -366,11 +369,13 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
             Int_t neeGenevt = 0;
             Int_t SumeventWeight = 0;
             //  clear Tree vector for each event
+            v_chi2_P.clear();
             f_thinJetPT.clear();
             f_thinJetEta.clear();
             f_thinjetCSVv2.clear();
             v_TrkChi3D.clear();
             v_TrkChi2D.clear();
+            v_TrkXYresolu.clear();
             v_TrkChi3D_Paper.clear();
             v_TrkIP3D.clear();
             v_Trkindex.clear();
@@ -405,6 +410,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
             v_nPassthinJetledLepdr.clear();
             v_nPassthinJetsubLepdr.clear();
             data.GetEntry(jEntry);
+            /*For Mc weight*/
             Float_t mcWeight = data.GetFloat("mcWeight");
             Double_t eventWeight = mcWeight;
             if (eventWeight > 0)
@@ -465,8 +471,6 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
             //---------------------------
             h_totevent->Fill(1.0, eventWeight);
 
-            // h_nlototevent->Fill(eventWeight, eventWeight);
-
             bool matchee = false;
             vector<TLorentzVector> myEles;
             vector<TLorentzVector> dquark;
@@ -499,6 +503,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                 if (abs(pid) == 18)
                 {
                     chi2s.push_back(*thisGen);
+                    v_chi2_P.push_back(thisGen->P());
                 }
             }
             gen_dquarknumb->Fill(dquark.size(), eventWeight);
@@ -790,6 +795,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                     } // End of nThinJet loop
                     // Sort goodJet by PT
                     sort(goodJet.begin(), goodJet.end(), pt_greater);
+                    /*Number of jet select*/
                     if (indexForPassAK4.size() < 2)
                         // if (indexForPassAK4.size() == 0)
                         continue;
@@ -946,13 +952,21 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                             v_TrkChi3D.push_back(chi3d);
                             v_TrkChi3D_Paper.push_back(chiP);
                             v_TrkChi2D.push_back(chi2d);
+
+                            double trk_xy_resolu = (dxy) / dxyerror;
+
+                            v_TrkXYresolu.push_back(sqrt(trk_xy_resolu * trk_xy_resolu));
                             v_TrkIP3D.push_back(IP3D);
                             v_TrkPT.push_back(THINjetTrackPt[correctjet_index][correcttrack_index]);
                             v_TrkIP2DxTrkPT.push_back(IP2D * THINjetTrackPt[correctjet_index][correcttrack_index]);
                             float TrackPt = thisJet->Pt();
                             if (TrackPt < THINjetTrackPt[correctjet_index][correcttrack_index])
                             {
-                                cout << "Jet PT = " << TrackPt << endl;
+                                cout << "--------- Jet and Track Information ---------\n"
+                                     << endl;
+
+                                cout << "Jet PT = " << TrackPt << "\n"
+                                     << endl;
                                 cout << "Track PT = " << THINjetTrackPt[correctjet_index][correcttrack_index] << endl;
                             }
                             v_TrkEta.push_back(THINjetTrackEta[correctjet_index][correcttrack_index]);
@@ -1002,7 +1016,7 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                         v_nPassthinJetPT.push_back(thisJet->Pt());
                         v_nPassthinJetEta.push_back(thisJet->Eta());
                         v_nPassthinJetM.push_back(thisJet->M());
-                        f_thinjetCSVv2.push_back(thinJetCSV[correctjet_index]);
+                        v_nPassthinJetCSVv2.push_back(thinJetCSV[correctjet_index]);
                         v_nPassthinJethadflavor.push_back(THINjetHadronFlavor[correctjet_index]);
                         v_nPassthinJetpartonflavor.push_back(THINjetPartonFlavor[correctjet_index]);
                         h_jet_csv->Fill(thinJetCSV[correctjet_index], eventWeight);
@@ -1030,27 +1044,6 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                     {
                         continue;
                     }
-                    /*
-                    if (v_nPassthinJetalpha.size() < 2)
-                    {
-                        cout << "event = " << jEntry << endl;
-                        cout << "v_nPassthinJetPT.size() = " << v_nPassthinJetalpha.size() << endl;
-                        for (int i = 0; i < indexForPassAK4.size(); i++)
-                        {
-                            cout << "Track size = " << v_indexPassJetTrack[i].size() << endl;
-                            int correctjet_index = indexForPassAK4[i];
-                            for (int j = 0; j < v_indexPassJetTrack[i].size(); j++)
-                            {
-                                int correcttrack_index = v_indexPassJetTrack[i][j];
-                                cout << "Track PT = " << THINjetTrackPt[correctjet_index][correcttrack_index] << endl;
-                                cout << "Track dzerror = " << THINjetTrackImpdz[correctjet_index][correcttrack_index] << endl;
-                                cout << "Track dxyerror = " << THINjetTrackImpdxy[correctjet_index][correcttrack_index] << endl;
-                            }
-                        }
-                        cout << "\n"
-                             << endl;
-                    }
-                    */
                     h_ee_npass->Fill(8, eventWeight);
                     // float maxaph = *max_element(v_aph.begin(), v_aph.end());
                     float minaph = *min_element(v_aph.begin(), v_aph.end());
@@ -1058,9 +1051,6 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                     //---------------------------
                     //   Fill Tree event variable
                     //---------------------------
-                    // TLorentzVector *thisJet = (TLorentzVector *)thinjetP4->At(indexForPassAK4[v_aph_index[minElementIndex]]);
-                    // f_minalphaJeteta = thisJet->Eta();
-                    // f_minalphaJetpt = thisJet->Pt();
                     I_event = jEntry;
                     I_weight = eventWeight;
                     f_HT = HT;
@@ -1082,11 +1072,15 @@ void xAna_ztoee(string inputtxtFilename = "/afs/cern.ch/user/k/kuanyu/test/tmp1.
                     ULong64_t eventId = data.GetLong64("eventId");
                     I_eventID = eventId;
                     T_tree->Fill();
-
                 } // recoEE
             }     // GenEE
         }         // End of loop over entries
     }             // End of loop all files
+    //-----------------
+    // Close input file
+    //-----------------
+    flist.close();
+
     // out Tree branches
     TFile *outFile = new TFile(outputfile.c_str(), "RECREATE");
     outFile->cd();
