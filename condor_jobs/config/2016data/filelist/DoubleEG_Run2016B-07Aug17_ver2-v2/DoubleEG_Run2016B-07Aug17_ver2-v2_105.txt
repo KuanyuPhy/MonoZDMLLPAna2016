@@ -1,0 +1,11 @@
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2626.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2627.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2628.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2629.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2630.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2631.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2632.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2633.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2634.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2635.root
+root://se01.grid.nchc.org.tw//dpm/grid.nchc.org.tw/home/cms/store/user/syu/DoubleEG/crab_DoubleEG_Run2016B-07Aug17_ver2-v2/210914_180927/0002/NCUGlobalTuples_2636.root
